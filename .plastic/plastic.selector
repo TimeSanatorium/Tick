@@ -1,0 +1,4 @@
+repository "Tick@tj_wechat_os_qy08aciayh20ptmmszntbpixc@cloud.cn"
+  path "/"
+    br "/main"
+    co "/main"
