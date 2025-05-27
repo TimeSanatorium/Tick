@@ -58,17 +58,52 @@ class MouseTwist : IFingerOperationTwist
 
     private void OnMouseLeftDown()
     {
-        Debug.Log("鼠标左键按下");
         m_fingerOperationHandle.IsFingerDown = true;
+        m_fingerOperationHandle.FingerScreenDownPos = Input.mousePosition;
+        m_fingerOperationHandle.FingerScreenCurrenPos = Input.mousePosition;
+        m_fingerOperationHandle.FingerScreenOffset = Vector2.zero;
+        m_fingerOperationHandle.DownTime = Time.time;
+        m_fingerOperationHandle.FingerScreenUpPos = Vector2.zero;
+
+        m_fingerOperationHandle.OnFingerDown?.Invoke();
     }
     private void OnMouserLeftMove()
     {
-        Debug.Log("鼠标左键移动");
+        Vector2 scrrenOffset = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - m_fingerOperationHandle.FingerScreenCurrenPos;
+        m_fingerOperationHandle.FingerScreenOffset = scrrenOffset;
+        m_fingerOperationHandle.FingerScreenCurrenPos = Input.mousePosition;
     }
     private void OnMouseLeftUp()
     {
-        Debug.Log("鼠标左键抬起");
         m_fingerOperationHandle.IsFingerDown = false;
+        m_fingerOperationHandle.ResetInfo();
+        m_fingerOperationHandle.FingerScreenUpPos = Input.mousePosition;
+
+        m_fingerOperationHandle.OnFingerUp?.Invoke();
+        if ((Time.time - m_fingerOperationHandle.DownTime) < m_fingerOperationHandle.PressInterval)
+        {
+            OnMouseLeftPress();
+        }
+    }
+
+    private void OnMouseLeftPress()
+    {
+
+        if ((Time.time - m_fingerOperationHandle.PrePressTime) < m_fingerOperationHandle.PressInterval)
+        {
+            OnMouseDoublePress();
+        }
+        else
+        {
+            m_fingerOperationHandle.OnPress?.Invoke();
+            m_fingerOperationHandle.PrePressTime = Time.time;
+        }
+    }
+
+    private void OnMouseDoublePress()
+    {
+        m_fingerOperationHandle.PrePressTime = 0;
+        m_fingerOperationHandle.OnDoublePress?.Invoke();
     }
     #region Operation
 

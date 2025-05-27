@@ -258,13 +258,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98aac9e16ab6ced4a99936804f2ae499, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsLimitingId: -1
-  PressInterval: 0
-  FingerScreenDownPos: {x: 0, y: 0}
-  FingerScreenUpPos: {x: 0, y: 0}
-  FingerScreenCurrenPos: {x: 0, y: 0}
-  FingerScreenOffset: {x: 0, y: 0}
-  isReset: 1
+  m_pressInterval: 0.2
+  m_fingerScreenDownPos: {x: 0, y: 0}
+  m_fingerScreenUpPos: {x: 0, y: 0}
+  m_fingerScreenCurrenPos: {x: 0, y: 0}
+  m_fingerScreenOffset: {x: 0, y: 0}
+  m_isFIngerDonw: 0
 --- !u!1 &1931728121
 GameObject:
   m_ObjectHideFlags: 0
