@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+namespace Tick{
 
 public class SingleFingerEventHandle : SingleMonoBehaviour<SingleFingerEventHandle>, IFingerOperationHandle
 {
@@ -59,9 +60,11 @@ public class SingleFingerEventHandle : SingleMonoBehaviour<SingleFingerEventHand
 
     private void TestHookEvent()
     {
-        OnFingerDown += () => { Debug.Log("鼠标按下"); };
-        OnFingerUp += () => { Debug.Log("鼠标抬起"); };
-        OnPress += () => { Debug.Log("鼠标单机"); };
-        OnDoublePress += () => { Debug.Log("鼠标双击"); };
+        OnFingerDown += () => { Debug.Log("鎸変笅"); };
+        OnFingerUp += () => { Debug.Log("鎶捣"); };
+        OnPress += () => { Debug.Log("鐐瑰嚮"); };
+        OnDoublePress += () => { Debug.Log("鍗曞嚮"); };
     }
+}
+
 }

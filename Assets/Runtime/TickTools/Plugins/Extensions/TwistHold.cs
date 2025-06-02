@@ -1,4 +1,5 @@
 using System;
+namespace Tick{
 public class TwistHold : ITwistHold
 {
     private bool isHold = true;
@@ -20,4 +21,6 @@ public class TwistHold : ITwistHold
         onUpdate?.Invoke();
         return isHold;
     }
+}
+
 }

@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
-
+namespace Tick{
+/// <summary>
+/// Êó±ê¼üÅÌ¹³×Ó
+/// </summary>
 class MouseTwist : IFingerOperationTwist
 {
     private bool isHold = true;
@@ -110,4 +113,5 @@ class MouseTwist : IFingerOperationTwist
     #region Operation
 
     #endregion
+}
 }

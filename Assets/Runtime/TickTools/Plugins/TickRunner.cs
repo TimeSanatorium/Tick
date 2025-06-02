@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+namespace Tick{
 internal sealed class TickRunner
 {
     public PlayerLoopTiming playerLoopTiming;
@@ -102,4 +103,5 @@ public enum PlayerLoopTiming
     TimeUpdate = 14,
     LastTimeUpdate = 15,
 #endif
+}
 }

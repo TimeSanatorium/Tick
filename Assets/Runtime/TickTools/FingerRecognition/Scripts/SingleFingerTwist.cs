@@ -1,9 +1,10 @@
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
+namespace Tick{
 
 /// <summary>
-/// 限制只能单指控制
+/// 鎵嬫寚閽╁瓙
 /// </summary>
 class SingleFingerTwist : IFingerOperationTwist
 {
@@ -127,4 +128,5 @@ class SingleFingerTwist : IFingerOperationTwist
         m_fingerOperationHandle.PrePressTime = 0;
         m_fingerOperationHandle.OnDoublePress?.Invoke();
     }
+}
 }

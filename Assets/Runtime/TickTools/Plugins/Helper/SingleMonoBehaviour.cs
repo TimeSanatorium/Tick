@@ -1,7 +1,8 @@
 using UnityEngine;
 /// <summary>
-/// ³¡¾°¹ÒÔØ½Å±¾µ¥Àı¶ÔÏó Ä¬ÈÏÔÚ¼ÓÔØ³¡¾°µÄÊ±ºò²»»áÏú»ÙÕâ¸ö¶ÔÏó
+/// åœºæ™¯å•ä¾‹ è·¨åœºæ™¯ä¼šåˆ é™¤
 /// </summary>
+namespace Tick{
 public class SingleMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 {
     private static T current;
@@ -16,7 +17,7 @@ public class SingleMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
             }
             if (current == null)
             {
-                throw new System.Exception($"³¡¾°ÖĞ²»´æÔÚ¹ÒÔØ{typeof(T)}½Å±¾µÄ¶ÔÏó");
+                throw new System.Exception($"åœºæ™¯ä¸­ä¸å­˜åœ¨æŒ‚åœ¨ {typeof(T)} çš„å¯¹è±¡");
             }
             return current;
         }
@@ -24,7 +25,7 @@ public class SingleMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     }
 
     /// <summary>
-    /// É¾³ıµ±Ç°¾²Ì¬¶ÔÏó
+    /// å¼ºè¡Œåˆ é™¤å½“å‰çš„å•ä¾‹
     /// </summary>
     public static void DestoryCurrentObject()
     {
@@ -33,4 +34,5 @@ public class SingleMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
             Destroy(current.gameObject);
         }
     }
+}
 }

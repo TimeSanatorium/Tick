@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Accessibility;
+namespace Tick{
 
 public interface IFingerOperationHandle
 {
@@ -20,4 +21,6 @@ public interface IFingerOperationHandle
     Action OnPress { get; set; }
     Action OnFingerHode { get; set; }
     void ResetInfo();
+}
+
 }

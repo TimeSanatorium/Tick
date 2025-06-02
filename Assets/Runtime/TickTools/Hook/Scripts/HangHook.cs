@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+namespace Tick{
 
 public class HangHook : MonoBehaviour
 {
@@ -39,4 +40,6 @@ public class HangHook : MonoBehaviour
         TwistHold holdTwist_14 = new TwistHold(PlayerLoopTiming.LastPostLateUpdate);
         holdTwist_14.OnUpdate += () => { Debug.Log("PlayerLoopTiming.LastPostLateUpdate"); };
     }
+}
+
 }

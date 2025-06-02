@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
+namespace Tick{
 
 public class PlayerLoopHelper : MonoBehaviour
 {
@@ -107,4 +108,5 @@ public class PlayerLoopHelper : MonoBehaviour
         TickRunner tickRunner = runners[(int)playerLoopTiming];
         tickRunner.AddTwist(twist);
     }
+}
 }
