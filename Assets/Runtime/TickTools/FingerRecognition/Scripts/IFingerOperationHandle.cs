@@ -18,5 +18,6 @@ public interface IFingerOperationHandle
     Action OnFingerUp { get; set; }
     Action OnDoublePress { get; set; }
     Action OnPress { get; set; }
+    Action OnFingerHode { get; set; }
     void ResetInfo();
 }

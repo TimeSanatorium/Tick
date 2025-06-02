@@ -1,5 +1,5 @@
 using System;
-public class HoldTwist : ITwistHold
+public class TwistHold : ITwistHold
 {
     private bool isHold = true;
     public bool IsHold { get => isHold; set => isHold = value; }
@@ -9,7 +9,7 @@ public class HoldTwist : ITwistHold
     public Action OnStart { get => onStart; set => onStart += value; }
     private Action onCompleted;
     public Action OnCompleted { get => onCompleted; set => onCompleted = value; }
-    public HoldTwist(PlayerLoopTiming playerLoopTiming,Action onStart = null,Action onCompleted = null)
+    public TwistHold(PlayerLoopTiming playerLoopTiming,Action onStart = null,Action onCompleted = null)
     {
         this.onStart += onStart;
         this.onCompleted += onCompleted;

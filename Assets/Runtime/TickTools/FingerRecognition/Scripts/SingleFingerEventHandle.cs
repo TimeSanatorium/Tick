@@ -37,13 +37,16 @@ public class SingleFingerEventHandle : SingleMonoBehaviour<SingleFingerEventHand
 
     private Action onPress;
     public Action OnPress { get => onPress; set => onPress = value; }
+    private Action onFingerHode;
+    public Action OnFingerHode { get => onFingerHode; set => onFingerHode = value; }
 
     private void Awake()
     {
 #if UNITY_STANDALONE || UNITY_EDITOR
-        new MouseTwist(this);
+        //new MouseTwist(this);
+        new SingleFingerTwist(this);
 #else
-        new FingerTwist(this);
+        new SingleFingerTwist(this);
 #endif
         TestHookEvent();
     }

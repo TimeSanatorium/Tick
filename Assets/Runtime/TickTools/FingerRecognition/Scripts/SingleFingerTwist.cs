@@ -1,7 +1,11 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
-class MouseTwist : IFingerOperationTwist
+/// <summary>
+/// 限制只能单指控制
+/// </summary>
+class SingleFingerTwist : IFingerOperationTwist
 {
     private bool isHold = true;
     public bool IsHold { get => isHold; set => isHold = value; }
@@ -14,19 +18,18 @@ class MouseTwist : IFingerOperationTwist
     private Action onCompleted;
     public Action OnCompleted { get => onCompleted; set => onCompleted += value; }
     #endregion
+
     private IFingerOperationHandle m_fingerOperationHandle;
     public IFingerOperationHandle _FingerOperationHandle { get => m_fingerOperationHandle; set => m_fingerOperationHandle = value; }
 
-    public MouseTwist(IFingerOperationHandle fingerEventHandle, Action onStart = null, Action onUpdate = null, Action onCompleted = null)
+    public SingleFingerTwist(IFingerOperationHandle fingerEventHandle,Action onStart = null,Action onUpdate = null,Action onCompleted = null)
     {
         this.OnStart = onStart;
         this.OnUpdate = onUpdate;
         this.OnCompleted = OnCompleted;
         this.onUpdate += UpdateFingerOperationHandle;
         this.m_fingerOperationHandle = fingerEventHandle;
-
         HangHook(PlayerLoopTiming.LastEarlyUpdate);
-
     }
     public void HangHook(PlayerLoopTiming playerLoopTiming)
     {
@@ -39,59 +42,79 @@ class MouseTwist : IFingerOperationTwist
             onCompleted?.Invoke();
         return IsHold;
     }
-
     private void UpdateFingerOperationHandle()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.touchCount > 0)
         {
-            OnMouseLeftDown();
-        }
-        else if (Input.GetMouseButton(0))
-        {
-            OnMouserLeftMove();
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            OnMouseLeftUp();
+            Touch touch = Input.GetTouch(0);
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    OnFingerDown(touch);
+                    break;
+                case TouchPhase.Moved:
+                    OnFingerMove(touch);
+                    break;
+                case TouchPhase.Stationary:
+                    OnFingerStationary(touch);
+                    break;
+                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
+                    OnFingerUp(touch);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
-    private void OnMouseLeftDown()
+    private void OnFingerDown(Touch touch)
     {
         m_fingerOperationHandle.IsFingerDown = true;
-        m_fingerOperationHandle.FingerScreenDownPos = Input.mousePosition;
-        m_fingerOperationHandle.FingerScreenCurrenPos = Input.mousePosition;
+        m_fingerOperationHandle.FingerScreenDownPos = touch.position;
+        m_fingerOperationHandle.FingerScreenCurrenPos = touch.position;
         m_fingerOperationHandle.FingerScreenOffset = Vector2.zero;
         m_fingerOperationHandle.DownTime = Time.time;
         m_fingerOperationHandle.FingerScreenUpPos = Vector2.zero;
 
         m_fingerOperationHandle.OnFingerDown?.Invoke();
     }
-    private void OnMouserLeftMove()
+
+    private void OnFingerMove(Touch touch)
     {
-        Vector2 scrrenOffset = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - m_fingerOperationHandle.FingerScreenCurrenPos;
-        m_fingerOperationHandle.FingerScreenOffset = scrrenOffset;
-        m_fingerOperationHandle.FingerScreenCurrenPos = Input.mousePosition;
+        m_fingerOperationHandle.FingerScreenOffset = touch.position - m_fingerOperationHandle.FingerScreenCurrenPos;
+        m_fingerOperationHandle.FingerScreenCurrenPos = touch.position;
+
+        m_fingerOperationHandle.OnFingerHode?.Invoke();
     }
-    private void OnMouseLeftUp()
+    private void OnFingerStationary(Touch touch)
     {
-        m_fingerOperationHandle.IsFingerDown = false;
+        m_fingerOperationHandle.FingerScreenOffset = Vector2.zero;
+
+        m_fingerOperationHandle.OnFingerHode?.Invoke();
+    }
+    private void OnFingerUp(Touch touch)
+    {
+        if (Input.touchCount <= 1)
+        {
+            m_fingerOperationHandle.IsFingerDown = false;
+            m_fingerOperationHandle.FingerScreenUpPos = touch.position;
+        }
+        
         m_fingerOperationHandle.ResetInfo();
-        m_fingerOperationHandle.FingerScreenUpPos = Input.mousePosition;
 
         m_fingerOperationHandle.OnFingerUp?.Invoke();
+
         if ((Time.time - m_fingerOperationHandle.DownTime) < m_fingerOperationHandle.PressInterval)
         {
-            OnMouseLeftPress();
+            OnPress(touch);
         }
     }
-
-    private void OnMouseLeftPress()
+    private void OnPress(Touch touch)
     {
-
         if ((Time.time - m_fingerOperationHandle.PrePressTime) < m_fingerOperationHandle.PressInterval)
         {
-            OnMouseDoublePress();
+            OnFingerDoublePress();
         }
         else
         {
@@ -99,13 +122,9 @@ class MouseTwist : IFingerOperationTwist
             m_fingerOperationHandle.PrePressTime = Time.time;
         }
     }
-
-    private void OnMouseDoublePress()
+    private void OnFingerDoublePress()
     {
         m_fingerOperationHandle.PrePressTime = 0;
         m_fingerOperationHandle.OnDoublePress?.Invoke();
     }
-    #region Operation
-
-    #endregion
 }

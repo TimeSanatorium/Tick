@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/TickTools/FingerRecognition/Example/SingleFingerEvent.unity
+    path: Assets/Runtime/TickTools/FingerRecognition/Example/SingleFingerEvent.unity
     guid: e4a3602d9452fa9428a5bc9e0d9a0bd7
   m_configObjects: {}
