@@ -1,107 +1,109 @@
 using System;
 using UnityEngine;
-namespace Tick{
-internal sealed class TickRunner
+namespace Tick
 {
-    public PlayerLoopTiming playerLoopTiming;
-    private ITwist[] twists;
-    private int tail;
-    public TickRunner(PlayerLoopTiming playerLoopTiming)
+    internal sealed class TickRunner
     {
-        this.playerLoopTiming = playerLoopTiming;
-        twists = new ITwist[16];
-        tail = 0;
-    }
-    public void Run()
-    {
-        for (int i = 0; i < tail; i++)
+        public PlayerLoopTiming playerLoopTiming;
+        private ITwist[] twists;
+        private int tail;//永远指向下一个为空的数据
+        public TickRunner(PlayerLoopTiming playerLoopTiming)
         {
-            ITwist twist = twists[i];
-            if (twist == null) { continue; }
-            if (!twist.MoveNext())
-            {
-                twists[i] = null;
-            }
+            this.playerLoopTiming = playerLoopTiming;
+            twists = new ITwist[16];
+            tail = 0;
         }
-    }
-
-
-    public void AddTwist(ITwist twist)
-    {
-        if (tail >= twists.Length)
+        public void Run()
         {
-            RecycleTwistArray();
+            if(playerLoopTiming == PlayerLoopTiming.Update)
             if (tail >= twists.Length)
+                RecycleTwistArray();
+            for (int i = 0; i < tail; i++)
+            {
+                ITwist twist = twists[i];
+                if (twist == null) { continue; }
+                if (!twist.MoveNext())
+                {
+                    twists[i] = null;
+                }
+            }
+        }
+
+
+        public void AddTwist(ITwist twist)
+        {
+            if (tail >= twists.Length)
+            {
                 ExpandTwistArray();
-        }
-        twists[tail] = twist;
-        tail++;
-    }
-
-    private void RecycleTwistArray()
-    {
-        int index = -1;
-        for (int i = 0; i < tail; i++)
-        {
-            ITwist twist = twists[i];
-            if (index == -1 && twist == null)
-            {
-                index = i;
             }
-            if (index != -1 && twist != null)
+            twists[tail] = twist;
+            tail++;
+        }
+
+        private void RecycleTwistArray()
+        {
+            int index = -1;
+            for (int i = 0; i < tail; i++)
             {
-                twists[index] = twist;
-                twists[i] = null;
-                index++;
+                ITwist twist = twists[i];
+                if (index == -1 && twist == null)
+                {
+                    index = i;
+                }
+                if (index != -1 && twist != null)
+                {
+                    twists[index] = twist;
+                    twists[i] = null;
+                    index++;
+                }
+            }
+            if (index != -1)
+            {
+                tail = index;
             }
         }
-        if (index != -1)
+        private void ExpandTwistArray()
         {
-            tail = index;
+            Array.Resize(ref twists, checked(tail * 2));
         }
-    }
-    private void ExpandTwistArray()
-    {
-        Array.Resize(ref twists, checked(tail * 2));
-    }
 
-    #region TestFunction
-    public void TestShowAllTwists()
-    {
-        for (int i = 0; i < tail; i++)
+        #region TestFunction
+        public void TestShowAllTwists()
         {
-            ITwist twist = twists[i];
-            Debug.Log(twist);
+            for (int i = 0; i < tail; i++)
+            {
+                ITwist twist = twists[i];
+                Debug.Log(twist);
+            }
         }
+        #endregion
     }
-    #endregion
-}
-public enum PlayerLoopTiming
-{
-    Initialization = 0,
-    LastInitialization = 1,
+    public enum PlayerLoopTiming
+    {
+        Initialization = 0,
+        LastInitialization = 1,
 
-    EarlyUpdate = 2,
-    LastEarlyUpdate = 3,
+        EarlyUpdate = 2,
+        LastEarlyUpdate = 3,
 
-    FixedUpdate = 4,
-    LastFixedUpdate = 5,
+        FixedUpdate = 4,
+        LastFixedUpdate = 5,
 
-    PreUpdate = 6,
-    LastPreUpdate = 7,
+        PreUpdate = 6,
+        LastPreUpdate = 7,
 
-    Update = 8,
-    LastUpdate = 9,
+        Update = 8,
+        LastUpdate = 9,
 
-    PreLateUpdate = 10,
-    LastPreLateUpdate = 11,
+        PreLateUpdate = 10,
+        LastPreLateUpdate = 11,
 
-    PostLateUpdate = 12,
-    LastPostLateUpdate = 13,
+        PostLateUpdate = 12,
+        LastPostLateUpdate = 13,
 
-#if UNITY_2020_2_OR_NEWER
-    TimeUpdate = 14,
-    LastTimeUpdate = 15,
-#endif
-}
+    #if UNITY_2020_2_OR_NEWER
+        TimeUpdate = 14,
+        LastTimeUpdate = 15,
+    #endif
+    }
 }

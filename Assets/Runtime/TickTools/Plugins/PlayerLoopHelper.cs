@@ -1,4 +1,5 @@
 using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
@@ -10,8 +11,10 @@ public class PlayerLoopHelper : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     private static void Initialize()
     {
-        PlayerLoopSystem defaltSystem = PlayerLoop.GetDefaultPlayerLoop();
-        PlayerLoop.SetPlayerLoop(defaltSystem);
+#if UNITY_EDITOR
+            EditorApplication.playModeStateChanged += OnPlayModeChanged;
+#endif
+
 #if UNITY_2020_2_OR_NEWER
         runners = new TickRunner[16];
 #else
@@ -108,5 +111,24 @@ public class PlayerLoopHelper : MonoBehaviour
         TickRunner tickRunner = runners[(int)playerLoopTiming];
         tickRunner.AddTwist(twist);
     }
-}
+        private static void OnPlayModeChanged(PlayModeStateChange state)
+        {
+            switch (state)
+            {
+                case PlayModeStateChange.EnteredEditMode:
+                    break;
+                case PlayModeStateChange.EnteredPlayMode:
+                    break;
+                case PlayModeStateChange.ExitingEditMode:
+                case PlayModeStateChange.ExitingPlayMode:
+                    PlayerLoopSystem playerLoopSystem = PlayerLoop.GetDefaultPlayerLoop();
+                    PlayerLoop.SetPlayerLoop(playerLoopSystem);
+                    EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+                    break;
+                default:
+                    break;
+            }
+
+        }
+    }
 }

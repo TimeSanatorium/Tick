@@ -26,7 +26,7 @@ public class TwistAsyncWaitFrame : ITwistAsync
     public bool MoveNext()
     {
         waitFrameCount--;
-        if (waitFrameCount <= 0)
+        if (waitFrameCount < 0)
         {
             continuation?.Invoke();
             return false;
