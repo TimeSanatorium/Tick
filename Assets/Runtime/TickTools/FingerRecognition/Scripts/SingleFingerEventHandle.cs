@@ -44,8 +44,7 @@ public class SingleFingerEventHandle : SingleMonoBehaviour<SingleFingerEventHand
     private void Awake()
     {
 #if UNITY_STANDALONE || UNITY_EDITOR
-        //new MouseTwist(this);
-        new SingleFingerTwist(this);
+        new MouseTwist(this);
 #else
         new SingleFingerTwist(this);
 #endif
