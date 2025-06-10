@@ -13,11 +13,6 @@ public class SingleMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
             if (current == null)
             {
                 current = GameObject.FindObjectOfType<T>();
-                //DontDestroyOnLoad(current.gameObject);
-            }
-            if (current == null)
-            {
-                throw new System.Exception($"场景中不存在挂在 {typeof(T)} 的对象");
             }
             return current;
         }

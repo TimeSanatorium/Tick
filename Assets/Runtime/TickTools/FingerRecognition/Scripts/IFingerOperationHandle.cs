@@ -1,26 +1,24 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Accessibility;
-namespace Tick{
-
-public interface IFingerOperationHandle
+namespace Tick
 {
-    float DownTime { get; set; }
-    float PressInterval { get; set; }
-    float PrePressTime { get; set; }
-    bool IsFingerDown { get; set; }
-    Vector2 FingerScreenDownPos { get; set; }
-    Vector2 FingerScreenUpPos { get; set; }
-    Vector2 FingerScreenCurrenPos { get; set; }
-    Vector2 FingerScreenOffset { get; set; }
-    Action OnFingerDown { get; set; }
-    Action OnFingerUp { get; set; }
-    Action OnDoublePress { get; set; }
-    Action OnPress { get; set; }
-    Action OnFingerHode { get; set; }
-    void ResetInfo();
-}
-
+    public interface IFingerOperationHandle
+    {
+        float PressInterval { get; set; }
+        LayerMask CheckLayerMask { get; set; }
+        SingleFingerDetectionState SingleFingerDetectionState { get; set; }
+        GameObject CheckCurrentDown { get; set; }//当前手指按下位置检测的对象
+        GameObject CheckCurrentHold { get; set; }//当前手指位置检测的对象
+        bool IsFingerDown { get; set; }
+        Vector2 FingerScreenDownPos { get; set; }
+        Vector2 FingerScreenUpPos { get; set; }
+        Vector2 FingerScreenCurrenPos { get; set; }
+        Vector2 FingerScreenOffset { get; set; }
+        Action<GameObject> OnFingerDown { get; set; }
+        Action<GameObject> OnFingerUp { get; set; }
+        Action<GameObject> OnDoublePress { get; set; }
+        Action<GameObject> OnPress { get; set; }
+        Action<GameObject> OnFingerHode { get; set; }
+        void ResetInfo();
+    }
 }
