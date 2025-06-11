@@ -1,12 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-namespace Tick{
-
-public interface IFingerOperationTwist : ITwistHold
+namespace Tick
 {
-    IFingerOperationHandle _FingerOperationHandle { get; set; }
-    void HangHook(PlayerLoopTiming playerLoopTiming);
-}
+    public interface IFingerOperationTwist : ITwistHold
+    {
+        void HangHook(PlayerLoopTiming playerLoopTiming);
+    }
 
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 namespace Tick
 {
@@ -8,8 +9,6 @@ namespace Tick
     class MouseTwist : IFingerOperationTwist
     {
         private bool isHold = true;
-        private float m_downTime;
-        private float m_pressTime;
         public bool IsHold { get => isHold; set => isHold = value; }
 
         #region TwistLifeCycle
@@ -20,19 +19,18 @@ namespace Tick
         private Action onCompleted;
         public Action OnCompleted { get => onCompleted; set => onCompleted += value; }
         #endregion
+        
+        private Dictionary<int, FingerOperationData> m_fingerOperationDatas;
         private IFingerOperationHandle m_fingerOperationHandle;
-        public IFingerOperationHandle _FingerOperationHandle { get => m_fingerOperationHandle; set => m_fingerOperationHandle = value; }
-
-        public MouseTwist(IFingerOperationHandle fingerEventHandle, Action onStart = null, Action onUpdate = null, Action onCompleted = null)
+        public MouseTwist(IFingerOperationHandle fingerOperationHandle, Action onStart = null, Action onUpdate = null, Action onCompleted = null)
         {
             this.OnStart = onStart;
             this.OnUpdate = onUpdate;
             this.OnCompleted = OnCompleted;
             this.onUpdate += UpdateFingerOperationHandle;
-            this.m_fingerOperationHandle = fingerEventHandle;
-
+            m_fingerOperationDatas = new Dictionary<int, FingerOperationData>();
+            m_fingerOperationHandle = fingerOperationHandle;
             HangHook(PlayerLoopTiming.LastEarlyUpdate);
-
         }
         public void HangHook(PlayerLoopTiming playerLoopTiming)
         {
@@ -60,50 +58,59 @@ namespace Tick
             {
                 OnMouseLeftUp();
             }
+            m_fingerOperationHandle.UpdateInfo(m_fingerOperationDatas);
         }
 
         #region Operation
         private void OnMouseLeftDown()
         {
-            m_fingerOperationHandle.IsFingerDown = true;
-            m_fingerOperationHandle.FingerScreenDownPos = Input.mousePosition;
-            m_fingerOperationHandle.FingerScreenCurrenPos = Input.mousePosition;
-            m_fingerOperationHandle.FingerScreenOffset = Vector2.zero;
-            m_downTime = Time.time;
-            m_fingerOperationHandle.FingerScreenUpPos = Vector2.zero;
+            if (!m_fingerOperationDatas.ContainsKey(0))
+            {
+                m_fingerOperationDatas.Add(0, new FingerOperationData(0));
+            }
+            FingerOperationData data = m_fingerOperationDatas[0];
+
+            data.IsFingerDown = true;
+            data.FingerScreenDownPos = Input.mousePosition;
+            data.FingerScreenCurrenPos = Input.mousePosition;
+            data.FingerScreenOffset = Vector2.zero;
+            data.downTime= Time.time;
+            data.FingerScreenUpPos = Vector2.zero;
 
             switch (m_fingerOperationHandle.SingleFingerDetectionState)
             {
                 case SingleFingerDetectionState.Empty:
                     break;
                 case SingleFingerDetectionState.Detection3D:
-                    m_fingerOperationHandle.CheckCurrentDown = RayCheckGameObject3D(m_fingerOperationHandle.FingerScreenDownPos);
+                    data.CheckCurrentDown = RayCheckGameObject3D(data.FingerScreenDownPos);
                     break;
                 case SingleFingerDetectionState.Detection2D:
-                    m_fingerOperationHandle.CheckCurrentDown = RayCheckGameObject2D(m_fingerOperationHandle.FingerScreenDownPos);
+                    data.CheckCurrentDown = RayCheckGameObject2D(data.FingerScreenDownPos);
                     break;
                 case SingleFingerDetectionState.Both:
                     break;
                 default:
                     break;
             }
-            
-            m_fingerOperationHandle.OnFingerDown?.Invoke(m_fingerOperationHandle.CheckCurrentDown);
+
+            m_fingerOperationHandle.OnFingerDown?.Invoke(data.CheckCurrentDown);
         }
         private void OnMouserLeftMove()
         {
-            m_fingerOperationHandle.FingerScreenOffset = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - m_fingerOperationHandle.FingerScreenCurrenPos;
-            m_fingerOperationHandle.FingerScreenCurrenPos = Input.mousePosition;
+            FingerOperationData data = m_fingerOperationDatas[0];
+
+            data.FingerScreenOffset = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - data.FingerScreenCurrenPos;
+            data.FingerScreenCurrenPos = Input.mousePosition;
 
             switch (m_fingerOperationHandle.SingleFingerDetectionState)
             {
                 case SingleFingerDetectionState.Empty:
                     break;
                 case SingleFingerDetectionState.Detection3D:
-                    m_fingerOperationHandle.CheckCurrentHold = RayCheckGameObject3D(m_fingerOperationHandle.FingerScreenCurrenPos);
+                    data.CheckCurrentHold = RayCheckGameObject3D(data.FingerScreenCurrenPos);
                     break;
                 case SingleFingerDetectionState.Detection2D:
-                    m_fingerOperationHandle.CheckCurrentHold = RayCheckGameObject2D(m_fingerOperationHandle.FingerScreenCurrenPos);
+                    data.CheckCurrentHold = RayCheckGameObject2D(data.FingerScreenCurrenPos);
                     break;
                 case SingleFingerDetectionState.Both:
                     break;
@@ -111,17 +118,19 @@ namespace Tick
                     break;
             }
 
-            m_fingerOperationHandle.OnFingerHode?.Invoke(m_fingerOperationHandle.CheckCurrentHold);
+            m_fingerOperationHandle.OnFingerHode?.Invoke(data.CheckCurrentHold);
         }
         private void OnMouseLeftUp()
         {
-            m_fingerOperationHandle.IsFingerDown = false;
-            m_fingerOperationHandle.ResetInfo();
-            m_fingerOperationHandle.FingerScreenUpPos = Input.mousePosition;
+            FingerOperationData data = m_fingerOperationDatas[0];
 
-            m_fingerOperationHandle.OnFingerUp?.Invoke(m_fingerOperationHandle.CheckCurrentHold);
+            data.IsFingerDown = false;
+            data.ResetInfo();
+            data.FingerScreenUpPos = Input.mousePosition;
 
-            if ((Time.time - m_downTime) < m_fingerOperationHandle.PressInterval)
+            m_fingerOperationHandle.OnFingerUp?.Invoke(data.CheckCurrentHold);
+
+            if ((Time.time - data.downTime) < m_fingerOperationHandle.PressInterval)
             {
                 OnMouseLeftPress();
             }
@@ -129,22 +138,24 @@ namespace Tick
 
         private void OnMouseLeftPress()
         {
-
-            if ((Time.time - m_pressTime) < m_fingerOperationHandle.PressInterval)
+            FingerOperationData data = m_fingerOperationDatas[0];
+            if ((Time.time - data.prePressTime) < m_fingerOperationHandle.PressInterval)
             {
                 OnMouseDoublePress();
             }
             else
             {
-                m_fingerOperationHandle.OnPress?.Invoke(m_fingerOperationHandle.CheckCurrentDown);
-                m_pressTime = Time.time;
+                m_fingerOperationHandle.OnPress?.Invoke(data.CheckCurrentDown);
+                data.prePressTime = Time.time;
             }
         }
 
         private void OnMouseDoublePress()
         {
-            m_pressTime = 0;
-            m_fingerOperationHandle.OnDoublePress?.Invoke(m_fingerOperationHandle.CheckCurrentDown);
+            FingerOperationData data = m_fingerOperationDatas[0];
+
+            data.prePressTime = 0;
+            m_fingerOperationHandle.OnDoublePress?.Invoke(data.CheckCurrentDown);
         }
         #endregion
 
@@ -154,7 +165,7 @@ namespace Tick
             GameObject result = null;
             Ray ray = Camera.main.ScreenPointToRay(screenPosition);
             RaycastHit hit;
-            if (Physics.Raycast(ray,out hit,float.MaxValue, m_fingerOperationHandle.CheckLayerMask))
+            if (Physics.Raycast(ray, out hit, 100, m_fingerOperationHandle.CheckLayerMask)) 
             {
                 result = hit.collider.gameObject;
             }
@@ -164,7 +175,7 @@ namespace Tick
         {
             GameObject result = null;
             Ray ray = Camera.main.ScreenPointToRay(screenPosition);
-            RaycastHit2D raycastHit2D = Physics2D.Raycast(ray.origin, ray.direction);
+            RaycastHit2D raycastHit2D = Physics2D.Raycast(ray.origin, ray.direction, 100, m_fingerOperationHandle.CheckLayerMask);
             if (raycastHit2D.collider != null)
             {
                 result = raycastHit2D.collider.gameObject;
