@@ -125,7 +125,6 @@ namespace Tick
             FingerOperationData data = m_fingerOperationDatas[0];
 
             data.IsFingerDown = false;
-            data.ResetInfo();
             data.FingerScreenUpPos = Input.mousePosition;
 
             m_fingerOperationHandle.OnFingerUp?.Invoke(data.CheckCurrentHold);
@@ -134,6 +133,8 @@ namespace Tick
             {
                 OnMouseLeftPress();
             }
+
+            data.ResetInfo();
         }
 
         private void OnMouseLeftPress()
@@ -174,8 +175,8 @@ namespace Tick
         private GameObject RayCheckGameObject2D(Vector2 screenPosition)
         {
             GameObject result = null;
-            Ray ray = Camera.main.ScreenPointToRay(screenPosition);
-            RaycastHit2D raycastHit2D = Physics2D.Raycast(ray.origin, ray.direction, 100, m_fingerOperationHandle.CheckLayerMask);
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D raycastHit2D = Physics2D.Raycast(mousePos, Vector3.forward,100, m_fingerOperationHandle.CheckLayerMask);
             if (raycastHit2D.collider != null)
             {
                 result = raycastHit2D.collider.gameObject;

@@ -146,7 +146,6 @@ namespace Tick
             FingerOperationData data = m_FingerOperationDatas[touch.fingerId];
             data.IsFingerDown = false;
             data.FingerScreenUpPos = touch.position;
-            data.ResetInfo();
 
             m_fingerOperationHandle.OnFingerUp?.Invoke(data.CheckCurrentHold);
 
@@ -154,6 +153,8 @@ namespace Tick
             {
                 OnPress(touch);
             }
+
+            data.ResetInfo();
         }
         private void OnPress(Touch touch)
         {
@@ -162,11 +163,8 @@ namespace Tick
             {
                 OnFingerDoublePress(touch);
             }
-            else
-            {
-                m_fingerOperationHandle.OnPress?.Invoke(data.CheckCurrentDown);
-                data.prePressTime = Time.time;
-            }
+            m_fingerOperationHandle.OnPress?.Invoke(data.CheckCurrentDown);
+            data.prePressTime = Time.time;
         }
         private void OnFingerDoublePress(Touch touch)
         {

@@ -16,6 +16,8 @@ namespace Tick
         }
         private void OnPress(GameObject go)
         {
+            if (go != gameObject) return;
+
             m_onPress?.Invoke();
         }
         private void OnDisable()
