@@ -4,27 +4,24 @@ namespace Tick
 { 
     public class PressGestureEvent : MonoBehaviour
     {
-        private Action m_onPress;
-        public Action OnPressEvent
-        {
-            get { return m_onPress; }
-            set { m_onPress += value; }
-        }
+        public bool IsRestrictionSingleFinger;
+        public Action<FingerOperationData> OnPressEvent;
+
         private void OnEnable()
         {
-            SingleFingerEventHandle.Current.OnPress += OnPress;
+            FingerEventHandle.Current.OnPress += OnPress;
         }
-        private void OnPress(GameObject go)
+        private void OnPress(FingerOperationData data)
         {
-            if (go != gameObject) return;
-
-            m_onPress?.Invoke();
+            if (IsRestrictionSingleFinger && data.fingerId != 0)return;
+            if (data.CheckCurrentDown != gameObject) return;
+            OnPressEvent?.Invoke(data);
         }
         private void OnDisable()
         {
-            if (SingleFingerEventHandle.Current != null)
+            if (FingerEventHandle.Current != null)
             {
-                SingleFingerEventHandle.Current.OnPress -= OnPress;
+                FingerEventHandle.Current.OnPress -= OnPress;
             }
             
         }

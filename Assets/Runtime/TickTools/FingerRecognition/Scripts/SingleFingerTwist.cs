@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 namespace Tick
 {
     /// <summary>
@@ -22,9 +24,7 @@ namespace Tick
         
         private IFingerOperationHandle m_fingerOperationHandle;
         public IFingerOperationHandle _FingerOperationHandle { get => m_fingerOperationHandle; set => m_fingerOperationHandle = value; }
-
         private Dictionary<int, FingerOperationData> m_FingerOperationDatas;
-
         public SingleFingerTwist(IFingerOperationHandle fingerEventHandle, Action onStart = null, Action onUpdate = null, Action onCompleted = null)
         {
             this.OnStart = onStart;
@@ -75,7 +75,6 @@ namespace Tick
                 _FingerOperationHandle.UpdateInfo(m_FingerOperationDatas);
             }
         }
-
         private void OnFingerDown(Touch touch)
         {
             if (!m_FingerOperationDatas.ContainsKey(touch.fingerId))
@@ -90,7 +89,7 @@ namespace Tick
             data.FingerScreenOffset = Vector2.zero;
             data.FingerScreenUpPos = Vector2.zero;
             data.downTime = Time.time;
-            
+            data.DownUI = GetDownUI(touch.position);
             switch (m_fingerOperationHandle.SingleFingerDetectionState)
             {
                 case SingleFingerDetectionState.Empty:
@@ -107,9 +106,8 @@ namespace Tick
                     break;
             }
 
-            m_fingerOperationHandle.OnFingerDown?.Invoke(data.CheckCurrentDown);
+            m_fingerOperationHandle.OnFingerDown?.Invoke(data);
         }
-
         private void OnFingerMove(Touch touch)
         {
             FingerOperationData data = m_FingerOperationDatas[touch.fingerId];
@@ -133,13 +131,13 @@ namespace Tick
                     break;
             }
 
-            m_fingerOperationHandle.OnFingerHode?.Invoke(data.CheckCurrentHold);
+            m_fingerOperationHandle.OnFingerHold?.Invoke(data);
         }
         private void OnFingerStationary(Touch touch)
         {
             FingerOperationData data = m_FingerOperationDatas[touch.fingerId];
             data.FingerScreenOffset = Vector2.zero;
-            m_fingerOperationHandle.OnFingerHode?.Invoke(data.CheckCurrentHold);
+            m_fingerOperationHandle.OnFingerHold?.Invoke(data);
         }
         private void OnFingerUp(Touch touch)
         {
@@ -147,13 +145,13 @@ namespace Tick
             data.IsFingerDown = false;
             data.FingerScreenUpPos = touch.position;
 
-            m_fingerOperationHandle.OnFingerUp?.Invoke(data.CheckCurrentHold);
-
             if ((Time.time - data.downTime) < m_fingerOperationHandle.PressInterval)
             {
                 OnPress(touch);
             }
 
+            m_fingerOperationHandle.OnFingerUp?.Invoke(data);
+            
             data.ResetInfo();
         }
         private void OnPress(Touch touch)
@@ -163,7 +161,7 @@ namespace Tick
             {
                 OnFingerDoublePress(touch);
             }
-            m_fingerOperationHandle.OnPress?.Invoke(data.CheckCurrentDown);
+            m_fingerOperationHandle.OnPress?.Invoke(data);
             data.prePressTime = Time.time;
         }
         private void OnFingerDoublePress(Touch touch)
@@ -171,7 +169,7 @@ namespace Tick
             FingerOperationData data = m_FingerOperationDatas[touch.fingerId];
 
             data.prePressTime = 0;
-            m_fingerOperationHandle.OnDoublePress?.Invoke(data.CheckCurrentDown);
+            m_fingerOperationHandle.OnDoublePress?.Invoke(data);
         }
         #region Check
         private GameObject RayCheckGameObject3D(Vector2 screenPosition)
@@ -195,6 +193,21 @@ namespace Tick
                 result = raycastHit2D.collider.gameObject;
             }
             return result;
+        }
+        private GameObject GetDownUI(Vector2 screenPosition)
+        {
+            List<RaycastResult> results = new List<RaycastResult>();
+            foreach (GraphicRaycaster raycaster in m_fingerOperationHandle.GraphicRaycasters)
+            {
+                PointerEventData pointerEventData = new PointerEventData(m_fingerOperationHandle.EventSystem);
+                pointerEventData.position = screenPosition;
+                raycaster.Raycast(pointerEventData, results);
+                if (results.Count > 0)
+                {
+                    return results[0].gameObject;
+                }
+            }
+            return null;
         }
         #endregion
     }

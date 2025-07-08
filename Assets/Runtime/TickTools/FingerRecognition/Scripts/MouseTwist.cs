@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 namespace Tick
 {
     /// <summary>
@@ -43,7 +46,6 @@ namespace Tick
                 onCompleted?.Invoke();
             return IsHold;
         }
-
         private void UpdateFingerOperationHandle()
         {
             if (Input.GetMouseButtonDown(0))
@@ -58,9 +60,16 @@ namespace Tick
             {
                 OnMouseLeftUp();
             }
+
+#if UNITY_EDITOR
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Q))
+            {
+                Debug.LogError("ÔÝÍ£±à¼­Æ÷");
+                EditorApplication.isPaused = !EditorApplication.isPaused;
+            }
+#endif
             m_fingerOperationHandle.UpdateInfo(m_fingerOperationDatas);
         }
-
         #region Operation
         private void OnMouseLeftDown()
         {
@@ -76,6 +85,8 @@ namespace Tick
             data.FingerScreenOffset = Vector2.zero;
             data.downTime= Time.time;
             data.FingerScreenUpPos = Vector2.zero;
+
+            data.DownUI = GetDownUI(Input.mousePosition);
 
             switch (m_fingerOperationHandle.SingleFingerDetectionState)
             {
@@ -93,7 +104,7 @@ namespace Tick
                     break;
             }
 
-            m_fingerOperationHandle.OnFingerDown?.Invoke(data.CheckCurrentDown);
+            m_fingerOperationHandle.OnFingerDown?.Invoke(data);
         }
         private void OnMouserLeftMove()
         {
@@ -118,7 +129,7 @@ namespace Tick
                     break;
             }
 
-            m_fingerOperationHandle.OnFingerHode?.Invoke(data.CheckCurrentHold);
+            m_fingerOperationHandle.OnFingerHold?.Invoke(data);
         }
         private void OnMouseLeftUp()
         {
@@ -127,36 +138,31 @@ namespace Tick
             data.IsFingerDown = false;
             data.FingerScreenUpPos = Input.mousePosition;
 
-            m_fingerOperationHandle.OnFingerUp?.Invoke(data.CheckCurrentHold);
-
             if ((Time.time - data.downTime) < m_fingerOperationHandle.PressInterval)
             {
                 OnMouseLeftPress();
             }
 
+            m_fingerOperationHandle.OnFingerUp?.Invoke(data);
+
             data.ResetInfo();
         }
-
         private void OnMouseLeftPress()
         {
             FingerOperationData data = m_fingerOperationDatas[0];
+            m_fingerOperationHandle.OnPress?.Invoke(data);
+            data.prePressTime = Time.time;
             if ((Time.time - data.prePressTime) < m_fingerOperationHandle.PressInterval)
             {
                 OnMouseDoublePress();
             }
-            else
-            {
-                m_fingerOperationHandle.OnPress?.Invoke(data.CheckCurrentDown);
-                data.prePressTime = Time.time;
-            }
         }
-
         private void OnMouseDoublePress()
         {
             FingerOperationData data = m_fingerOperationDatas[0];
 
             data.prePressTime = 0;
-            m_fingerOperationHandle.OnDoublePress?.Invoke(data.CheckCurrentDown);
+            m_fingerOperationHandle.OnDoublePress?.Invoke(data);
         }
         #endregion
 
@@ -182,6 +188,21 @@ namespace Tick
                 result = raycastHit2D.collider.gameObject;
             }
             return result;
+        }
+        private GameObject GetDownUI(Vector2 screenPosition)
+        {
+            List<RaycastResult> results = new List<RaycastResult>();
+            foreach (GraphicRaycaster raycaster in m_fingerOperationHandle.GraphicRaycasters)
+            {
+                PointerEventData pointerEventData = new PointerEventData(m_fingerOperationHandle.EventSystem);
+                pointerEventData.position = screenPosition;
+                raycaster.Raycast(pointerEventData, results);
+                if (results.Count > 0)
+                {
+                    return results[0].gameObject;
+                }
+            }
+            return null;
         }
         #endregion
     }

@@ -13,6 +13,7 @@ public class FingerOperationData
     public Vector2 FingerScreenOffset;
     public GameObject CheckCurrentDown;//当前手指按下位置检测的对象
     public GameObject CheckCurrentHold;//当前手指位置检测的对象
+    public GameObject DownUI;//当前手指按下去的UI
     public FingerOperationData(int fingerId)
     {
         this.fingerId = fingerId;

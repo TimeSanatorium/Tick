@@ -134,3 +134,17 @@ namespace Tick
 #endif
     }
 }
+public static class PlatformHelper
+{
+    public static bool IsMobilePlatform()
+    {
+        return Application.platform == RuntimePlatform.Android ||
+               Application.platform == RuntimePlatform.IPhonePlayer;
+    }
+    public static bool IsPCPlatform()
+    {
+        return Application.platform == RuntimePlatform.WindowsPlayer ||
+               Application.platform == RuntimePlatform.LinuxPlayer ||
+               Application.platform == RuntimePlatform.OSXPlayer;
+    }
+}
