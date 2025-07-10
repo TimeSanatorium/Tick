@@ -205,5 +205,10 @@ namespace Tick
             return null;
         }
         #endregion
+
+        public void Destory()
+        {
+            isHold = false;
+        }
     }
 }

@@ -28,7 +28,6 @@ namespace Tick
             if (IsRestrictionSingleFinger && data.fingerId != 0) return;
             if (data.CheckCurrentDown != gameObject) return;
             if (dragFingerID != -1 && data.fingerId != dragFingerID) return;
-            Debug.LogError(data.fingerId);
             switch (dragState)
             {
                 case DragState.WaitDrag:

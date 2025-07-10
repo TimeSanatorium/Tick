@@ -24,8 +24,7 @@ namespace Tick
         public LayerMask CheckLayerMask { get => m_checkLayerMask; set => m_checkLayerMask = value; }
         public SingleFingerDetectionState SingleFingerDetectionState { get => singleFingerDetectionState; set => singleFingerDetectionState = value; }
 
-        private Dictionary<int, GameObject> m_CheckCurrentDown = new Dictionary<int, GameObject>();//手指按下去检测到的对象
-        private Dictionary<int, GameObject> m_CheckCurrentHold = new Dictionary<int, GameObject>();//手指当前位置下面检测到的对象
+        private IFingerOperationTwist m_fingerOperationTwist;
 
         #region Event
         public float PressInterval { get => m_pressInterval; set => m_pressInterval = value; }
@@ -50,9 +49,9 @@ namespace Tick
         {
             m_EventSystem = GameObject.FindObjectOfType<EventSystem>();
 #if UNITY_STANDALONE || UNITY_EDITOR
-            new MouseTwist(this);
+            m_fingerOperationTwist = new MouseTwist(this);
 #else
-            new SingleFingerTwist(this);
+            m_fingerOperationTwist = new SingleFingerTwist(this);
 #endif
         }
         /// <summary>
@@ -65,6 +64,10 @@ namespace Tick
             {
                 m_isFIngerDonw = fingerOperationDatas[0].IsFingerDown;
             }
+        }
+        private void OnDestroy()
+        {
+            m_fingerOperationTwist.Destory();
         }
     }
     public enum SingleFingerDetectionState

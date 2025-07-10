@@ -33,3 +33,6 @@
  - OnFingerHode：委托，当有手指停在屏幕上的时候调用
  - OnPress：委托，当手指点击的时候调用
  - OnDoublePress：委托，当手指双击的时候调用
+
+## Inspector扩展
+[Button("Describe")]：为当前的方法在Inspector面板上添加一个触发按钮。
